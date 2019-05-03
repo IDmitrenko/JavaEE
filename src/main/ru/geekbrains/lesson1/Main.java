@@ -6,9 +6,7 @@ import ru.geekbrains.lesson1.ccc.ChildOfRoot;
 import ru.geekbrains.lesson1.ccc.Root;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
 public class Main {
 
