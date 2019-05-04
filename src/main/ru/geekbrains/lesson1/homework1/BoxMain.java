@@ -6,7 +6,7 @@ public class BoxMain {
         Box<Apple> appleBox1 = new Box<>();
         Box<Orange> orangeBox = new Box<>();
 
-        for (int i = 0; i < 8; i++) {
+        for (int i = 0; i < 10; i++) {
             appleBox1.addBox(new Apple());
             orangeBox.addBox(new Orange());
         }

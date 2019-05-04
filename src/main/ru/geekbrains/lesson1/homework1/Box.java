@@ -1,37 +1,34 @@
 package ru.geekbrains.lesson1.homework1;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class Box<T extends Fruit> {
-    private ArrayList<T> obj;
-
-    public Box() {
-        this.obj = new ArrayList<>();
-    }
+    private List<T> fruits = new ArrayList<>();
 
     public void addBox(T fruit) {
-        obj.add(fruit);
+        fruits.add(fruit);
     }
 
     public int getCount() {
-        return obj.size();
+        return fruits.size();
     }
 
     public Float getWeight() {
-        return obj.size() * obj.get(0).getWeight();
+        return getCount() * fruits.get(0).getWeight();
     }
 
-    public boolean compare(Box box) {
-        boolean result = false;
-        if (this.getWeight().equals(box.getWeight()))
-            result = true;
-        return result;
+    public boolean compare(Box<?> box) {
+        return Math.abs(this.getWeight() - box.getWeight()) < 0.0001;
     }
 
     public void move(Box<T> box) {
+/*
         for (T t : this.obj) {
             box.addBox(t);
         }
-        this.obj.clear();
+*/
+        box.fruits.addAll(this.fruits);
+        this.fruits.clear();
     }
 }

@@ -1,8 +1,6 @@
 package ru.geekbrains.lesson1.homework1;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.*;
 
 public class Main {
 
@@ -34,7 +32,7 @@ public class Main {
                 System.out.printf(arr1[i] + ", ");
             }
         }
-        ArrayList<String> arrayListS = new Main().arrayToArrayList(arr1);
+        List<String> arrayListS = new Main().arrayToArrayList(arr1);
         System.out.println(arrayListS);
 
         for (int i = 0; i < arr2.length; i++) {
@@ -44,7 +42,7 @@ public class Main {
                 System.out.printf(arr2[i] + ", ");
             }
         }
-        ArrayList<Double> arrayListD = new Main().arrayToArrayList(arr2);
+        List<Double> arrayListD = new Main().arrayToArrayList(arr2);
         System.out.println(arrayListD);
 
         for (int i = 0; i < arr3.length; i++) {
@@ -54,33 +52,24 @@ public class Main {
                 System.out.printf(arr3[i] + ", ");
             }
         }
-        ArrayList<Integer> arrayListI = new Main().arrayToArrayList(arr3);
+        List<Integer> arrayListI = new Main().arrayToArrayList(arr3);
         System.out.println(arrayListI);
 
     }
 
-    private <T> T[] swapArrayElements(T[] arr, int a, int b) throws ArrayIndexOutOfBoundsException {
-        if (arr.length > a && arr.length > b) {
-            T element = arr[a];
-            arr[a] = arr[b];
-            arr[b] = element;
-        } else {
-            throw new ArrayIndexOutOfBoundsException();
-        }
+    private <T> T[] swapArrayElements(T[] arr, int a, int b) {
+        T element = arr[a];
+        arr[a] = arr[b];
+        arr[b] = element;
         return arr;
     }
 
-    private <T> ArrayList<T> arrayToArrayList(T[] arr) {
-        ArrayList<T> arrayList = new ArrayList<>();
-        arrayList.addAll(Arrays.asList(arr));
+    private <T> List<T> arrayToArrayList(T[] arr) {
+        List<T> arrayList = new ArrayList<>();
+        Collections.addAll(arrayList, arr);
 /*
         for (T t : arr) {
             arrayList.add(t);
-        }
-*/
-/*
-        for (int i = 0; i < arr.length; i++) {
-            arrayList.add(arr[i]);
         }
 */
         return arrayList;
