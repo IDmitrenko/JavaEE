@@ -1,6 +1,13 @@
 package ru.geekbrains.lesson1.homework1;
 
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public class BoxMain {
+
+    private static final Logger LOGGER = LogManager.getLogger(BoxMain.class);
+
     public static void main(String[] args) {
 
         Box<Apple> appleBox1 = new Box<>();
