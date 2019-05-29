@@ -1,34 +1,34 @@
 package ru.geekbrains.lesson6;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
+import java.util.logging.*;
 
 public class JdkLoggerDemo {
 
     private static final Logger logger = Logger.getLogger(JdkLoggerDemo.class.getName());
 
     public static void main(String[] args) throws IOException {
-//        logger.setLevel(Level.ALL);
-//        logger.getParent().setLevel(Level.ALL);
-//        logger.getParent().getHandlers()[0].setLevel(Level.ALL);
-//
-//        FileHandler fileHandler = new FileHandler("log_file.log", true);
-//        fileHandler.setFormatter(new Formatter() {
-//            @Override
-//            public String format(LogRecord record) {
-//                return String.format("! %s %d %s%n", record.getLevel(), record.getMillis(), record.getMessage());
-//            }
-//        });
-//        logger.addHandler(fileHandler);
-//
-//        logger.setFilter(new Filter() {
-//            @Override
-//            public boolean isLoggable(LogRecord record) {
-//                return record.getMessage().contains("War");
-//            }
-//        });
+/*
+        logger.setLevel(Level.ALL);
+        logger.getParent().setLevel(Level.ALL);
+        logger.getParent().getHandlers()[0].setLevel(Level.ALL);
+
+        FileHandler fileHandler = new FileHandler("log.%u.%g.txt", true);
+        fileHandler.setFormatter(new Formatter() {
+            @Override
+            public String format(LogRecord record) {
+                return String.format("! %s %d %s%n", record.getLevel(), record.getMillis(), record.getMessage());
+            }
+        });
+        logger.addHandler(fileHandler);
+
+        logger.setFilter(new Filter() {
+            @Override
+            public boolean isLoggable(LogRecord record) {
+                return record.getMessage().contains("War");
+            }
+        });
+*/
 
         LogManager.getLogManager().readConfiguration(JdkLoggerDemo.class.getClassLoader()
                 .getResourceAsStream("jul.properties"));
