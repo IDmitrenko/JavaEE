@@ -1,5 +1,9 @@
 package ru.geekbrains.lesson6;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
 public class HomeWork6 {
 
     private static int number1 = 4;
@@ -27,7 +31,23 @@ public class HomeWork6 {
         boolean rezTest2Arr3 = compositionCheck(arr3);
         boolean rezTest2Arr4 = compositionCheck(arr4);
 
+        Collection<Object[]> listArr = data();
     }
+
+    public static Collection<Object[]> data() {
+                int arr[][][] = {
+                        {{1, 2, 4, 4, 2, 3, 4, 1, 7},
+                                {1, 7}},
+                        {{32, 34, 4, 2, 90, 87, 125},
+                                {2, 90, 87, 125}},
+                        {{45, 666, 916, 22, 39, 124, 21, 10},
+                                {}},
+                        {{4, 4, 7, 0, 30, 5, 2019, 5, 66, 88, 94, 64},
+                                {7, 0, 30, 5, 2019, 5, 66, 88, 94, 64}}
+                };
+
+        return Arrays.asList(arr);
+        }
 
     private static int[] arrayProcessing(int[] arr) throws RuntimeException {
         int origin = -1;
