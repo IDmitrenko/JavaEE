@@ -1,6 +1,6 @@
 package ru.geekbrains.lesson7.orm;
 
-@Table(tableName = "USERS")
+@Table(tableName = "USERS1")
 public class User {
 
     @PrimaryKey
@@ -8,13 +8,16 @@ public class User {
     private int id;
 
     @Unique
-    @Field(name = "login")
+    @Index
+    @NotNull
+    @Field(name = "login", length = 25)
     private String login;
 
-    @Field(name = "password")
+    @NotNull
+    @Field(name = "password", length = 25)
     private String password;
 
-    @Field(name = "address")
+    @Field(name = "address", length = 255)
     private String address;
 
     public User(int id, String login, String password) {

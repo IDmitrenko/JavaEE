@@ -1,11 +1,9 @@
 package ru.geekbrains.lesson7.orm;
 
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Repository<T> {
 
@@ -15,14 +13,70 @@ public class Repository<T> {
     public Repository(Connection conn, Class<T> clazz) throws SQLException {
         this.conn = conn;
         this.clazz = clazz;
-        createTableIfNotExists(conn);
     }
 
-    public void insert(User user) throws SQLException {
+    public void insertO(User user) throws SQLException {
         try (PreparedStatement stmt = conn.prepareStatement(
                 "insert into users(login, password) values (?, ?);")) {
             stmt.setString(1, user.getLogin());
             stmt.setString(2, user.getPassword());
+            stmt.execute();
+        }
+    }
+
+    public void insert(T obj) throws SQLException {
+
+        if (!clazz.isAnnotationPresent(Table.class)) {
+            throw new IllegalStateException("No Table annotation");
+        }
+        String tableName = clazz.getAnnotation(Table.class).tableName();
+        tableName = tableName.isEmpty() ? clazz.getSimpleName() : tableName;
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("insert into " + tableName + "(");
+        StringBuilder vl = new StringBuilder();
+        vl.append(" values (");
+
+        Map<String, Object> nameAndValue = new LinkedHashMap<>();
+
+        for (Field fld : clazz.getDeclaredFields()) {
+            if (!fld.isAnnotationPresent(ru.geekbrains.lesson7.orm.Field.class) ||
+                    fld.isAnnotationPresent(PrimaryKey.class)) {
+                continue;
+            }
+            ru.geekbrains.lesson7.orm.Field fldAnnotation = fld.getAnnotation(ru.geekbrains.lesson7.orm.Field.class);
+            String fieldName = fldAnnotation.name().isEmpty() ? fld.getName() : fldAnnotation.name();
+            try {
+                nameAndValue.put(fieldName,
+                        clazz.getMethod("get" + fieldName.substring(0, 1)
+                                .toUpperCase() + fieldName.substring(1), null)
+                                .invoke(obj));
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            }
+
+            sb.append(fieldName + ",");
+            vl.append("?,");
+
+        }
+
+        sb.deleteCharAt(sb.length() - 1);
+        if (vl.length() > 0) {
+            vl.deleteCharAt(vl.length() - 1);
+            sb.append(vl);
+        }
+        sb.append(");");
+
+        try (PreparedStatement stmt = conn.prepareStatement(sb.toString())) {
+            int i = 1;
+            for (Map.Entry<String, Object> keyVal : nameAndValue.entrySet()) {
+                stmt.setString(i, keyVal.getValue().toString());
+                i++;
+            }
             stmt.execute();
         }
     }
@@ -52,19 +106,15 @@ public class Repository<T> {
         return res;
     }
 
-    private void createTableIfNotExists(Connection conn) throws SQLException {
+    public void createTableIfNotExists(String stringSQL) throws SQLException {
         try (Statement stmt = conn.createStatement()) {
-            stmt.execute("create table if not exists users (\n" +
-                    "\tid int auto_increment primary key,\n" +
-                    "    login varchar(25),\n" +
-                    "    password varchar(25),\n" +
-                    "    unique index uq_login(login)\n" +
-                    ");");
+            stmt.execute(stringSQL);
         }
     }
 
     public String buildCreateTableStatement() {
         StringBuilder sb = new StringBuilder();
+        StringBuilder ind = new StringBuilder();
         if (!clazz.isAnnotationPresent(Table.class)) {
             throw new IllegalStateException("No Table annotation");
         }
@@ -78,37 +128,57 @@ public class Repository<T> {
             }
             ru.geekbrains.lesson7.orm.Field fldAnnotation = fld.getAnnotation(ru.geekbrains.lesson7.orm.Field.class);
             String fieldName = fldAnnotation.name().isEmpty() ? fld.getName() : fldAnnotation.name();
+            int fieldLength = fldAnnotation.length();
             String fieldType = null;
             Class<?> type = fld.getType();
             if (type == int.class) {
                 fieldType = "int";
             } else if (type == String.class) {
-                fieldType = "varchar(";
-                try {
-                    Object fieldString = clazz.getClass()
-                            .getMethod("get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1, fieldName.length()), null)
-                            .invoke(clazz);
-                    int lenField = ((String) fieldString).length();
-                    fieldType += lenField + ")";
-                } catch (IllegalAccessException e) {
-                    e.printStackTrace();
-                } catch (InvocationTargetException e) {
-                    e.printStackTrace();
-                } catch (NoSuchMethodException e) {
-                    e.printStackTrace();
+                if (fieldLength == 0) {
+                    fieldType = "varchar(25)";
+                } else {
+                    fieldType = "varchar(" + fieldLength + ")";
                 }
+            } else if (type == boolean.class) {
+                fieldType = "bit";
+            } else if (type == byte.class) {
+                fieldType = "tinyint";
+            } else if (type == char.class) {
+                if (fieldLength == 0) {
+                    fieldType = "char(1)";
+                } else {
+                    fieldType = "char(" + fieldLength + ")";
+                }
+            } else if (type == double.class) {
+                fieldType = "double";
+            } else if (type == float.class) {
+                fieldType = "real";
+            } else if (type == long.class) {
+                fieldType = "bigint";
+            } else if (type == short.class) {
+                fieldType = "smallint";
+            } else if (type == java.util.Date.class) {
+                fieldType = "datetime";
+            } else if (type == java.io.Serializable.class) {
+                fieldType = "blob";
             }
+
             boolean isPrimaryKey = fld.isAnnotationPresent(PrimaryKey.class);
             boolean isNotNull = fld.isAnnotationPresent(NotNull.class);
             boolean isUnique = fld.isAnnotationPresent(Unique.class);
+            boolean isIndex = fld.isAnnotationPresent(Index.class);
 
             sb.append(fieldName + " " + fieldType +
                     (isPrimaryKey ? " primary key" : "") +
                     (isNotNull ? " not null" : "") +
-                    (isUnique ? " unique index uq_" + fieldName + "(" + fieldName + ")" : "") +
+                    (isUnique ? " unique" : "") +
                     ",");
-
+            if (isIndex)
+                ind.append(" index uq_" + fieldName + "(" + fieldName + "),");
         }
+
+        if (ind.length() > 0)
+            sb.append(ind);
 
         sb.deleteCharAt(sb.length() - 1);
         sb.append(");");

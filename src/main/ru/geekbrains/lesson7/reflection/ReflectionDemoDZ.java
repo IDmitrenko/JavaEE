@@ -11,7 +11,8 @@ public class ReflectionDemoDZ {
 
     public static void main(String[] args) {
 
-        String rez;
+        String stringSQL;
+        Connection conn = null;
         final String connectionString = "jdbc:mysql://localhost:3306/network_chat" +
                 "?allowPublicKeyRetrieval=TRUE" +
                 "&useSSL=false" +
@@ -21,10 +22,29 @@ public class ReflectionDemoDZ {
                 "&serverTimezone=UTC";
 
         try {
-            Connection conn = DriverManager.getConnection(connectionString,
+            conn = DriverManager.getConnection(connectionString,
                     "root", "DiasTopaz3922");
-            Repository<User> userRepository = new Repository<>(conn, User.class);
-            rez = userRepository.buildCreateTableStatement();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        Repository<User> userRepository = null;
+        try {
+            userRepository = new Repository<>(conn, User.class);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        stringSQL = userRepository.buildCreateTableStatement();
+        System.out.println(stringSQL);
+        try {
+            userRepository.createTableIfNotExists(stringSQL);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        User user = new User(0, "Вася", "1001");
+        try {
+            userRepository.insert(user);
         } catch (SQLException e) {
             e.printStackTrace();
         }
