@@ -2,6 +2,7 @@ package ru.geekbrains.lesson7.orm;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -82,11 +83,31 @@ public class Repository<T> {
             if (type == int.class) {
                 fieldType = "int";
             } else if (type == String.class) {
-                fieldType = "varchar(25)";
+                fieldType = "varchar(";
+                try {
+                    Object fieldString = clazz.getClass()
+                            .getMethod("get"+fieldName.substring(0, 1).toUpperCase()+fieldName.substring(1, fieldName.length()), null)
+                            .invoke(clazz);
+                    int lenField = ((String) fieldString).length();
+                    fieldType += lenField + ")";
+                } catch (IllegalAccessException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                } catch (NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
             }
             boolean isPrimaryKey = fld.isAnnotationPresent(PrimaryKey.class);
+            boolean isNotNull = fld.isAnnotationPresent(NotNull.class);
+            boolean isUnique = fld.isAnnotationPresent(Unique.class);
 
-            sb.append(fieldName + " " + fieldType + " " + (isPrimaryKey ? "primary key" : "") + ",");
+            sb.append(fieldName + " " + fieldType +
+                    (isPrimaryKey ? " primary key" : "") +
+                    (isNotNull ? " not null" : "") +
+                    (isUnique ? " unique index uq_" + fieldName + "(" + fieldName + ")" : "") +
+                    ",");
+
         }
 
         sb.deleteCharAt(sb.length() - 1);
