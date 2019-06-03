@@ -26,6 +26,14 @@ public class User {
         this.password = password;
     }
 
+
+    public User(int id, String login, String password, String address) {
+        this.id = id;
+        this.login = login;
+        this.password = password;
+        this.address = address;
+    }
+
     public int getId() {
         return id;
     }
@@ -36,5 +44,9 @@ public class User {
 
     public String getPassword() {
         return password;
+    }
+
+    public String getAddress() {
+        return address;
     }
 }

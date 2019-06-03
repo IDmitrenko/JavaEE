@@ -10,7 +10,7 @@ public class Repository<T> {
     private final Connection conn;
     private Class<T> clazz;
 
-    public Repository(Connection conn, Class<T> clazz) throws SQLException {
+    public Repository(Connection conn, Class<T> clazz) throws SQLException{
         this.conn = conn;
         this.clazz = clazz;
     }
@@ -47,10 +47,14 @@ public class Repository<T> {
             ru.geekbrains.lesson7.orm.Field fldAnnotation = fld.getAnnotation(ru.geekbrains.lesson7.orm.Field.class);
             String fieldName = fldAnnotation.name().isEmpty() ? fld.getName() : fldAnnotation.name();
             try {
-                nameAndValue.put(fieldName,
-                        clazz.getMethod("get" + fieldName.substring(0, 1)
-                                .toUpperCase() + fieldName.substring(1), null)
-                                .invoke(obj));
+                Object value = clazz.getMethod("get" + fieldName.substring(0, 1)
+                        .toUpperCase() + fieldName.substring(1), null)
+                        .invoke(obj);
+                if (value != null) {
+                    nameAndValue.put(fieldName, value);
+                    sb.append(fieldName + ",");
+                    vl.append("?,");
+                }
             } catch (IllegalAccessException e) {
                 e.printStackTrace();
             } catch (InvocationTargetException e) {
@@ -59,23 +63,42 @@ public class Repository<T> {
                 e.printStackTrace();
             }
 
-            sb.append(fieldName + ",");
-            vl.append("?,");
-
         }
 
         sb.deleteCharAt(sb.length() - 1);
+        sb.append(")");
         if (vl.length() > 0) {
             vl.deleteCharAt(vl.length() - 1);
+            vl.append(")");
             sb.append(vl);
         }
-        sb.append(");");
+        sb.append(";");
 
         try (PreparedStatement stmt = conn.prepareStatement(sb.toString())) {
             int i = 1;
             for (Map.Entry<String, Object> keyVal : nameAndValue.entrySet()) {
-                stmt.setString(i, keyVal.getValue().toString());
-                i++;
+                if (keyVal.getValue() != null) {
+                    if (keyVal.getValue() instanceof Integer) {
+                        stmt.setInt(i, (Integer) keyVal.getValue());
+                    } else if (keyVal.getValue() instanceof String) {
+                        stmt.setString(i, (String) keyVal.getValue());
+                    } else if (keyVal.getValue() instanceof Boolean) {
+                        stmt.setBoolean(i, (Boolean) keyVal.getValue());
+                    } else if (keyVal.getValue() instanceof Byte) {
+                        stmt.setByte(i, (Byte) keyVal.getValue());
+                    } else if (keyVal.getValue() instanceof Float) {
+                        stmt.setFloat(i, (Float) keyVal.getValue());
+                    } else if (keyVal.getValue() instanceof Double) {
+                        stmt.setDouble(i, (Double) keyVal.getValue());
+                    } else if (keyVal.getValue() instanceof Long) {
+                        stmt.setLong(i, (Long) keyVal.getValue());
+                    } else if (keyVal.getValue() instanceof Short) {
+                        stmt.setShort(i, (Short) keyVal.getValue());
+                    } else if (keyVal.getValue() instanceof Blob) {
+                        stmt.setBlob(i, (Blob) keyVal.getValue());
+                    }
+                    i++;
+                }
             }
             stmt.execute();
         }
@@ -144,11 +167,7 @@ public class Repository<T> {
             } else if (type == byte.class) {
                 fieldType = "tinyint";
             } else if (type == char.class) {
-                if (fieldLength == 0) {
-                    fieldType = "char(1)";
-                } else {
-                    fieldType = "char(" + fieldLength + ")";
-                }
+                fieldType = "char";
             } else if (type == double.class) {
                 fieldType = "double";
             } else if (type == float.class) {
