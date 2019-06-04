@@ -4,6 +4,7 @@ package ru.geekbrains.lesson7.orm;
 public class User {
 
     @PrimaryKey
+    @AutoIncrement
     @Field(name = "id")
     private int id;
 
@@ -34,6 +35,8 @@ public class User {
         this.address = address;
     }
 
+    public User() {};
+
     public int getId() {
         return id;
     }
@@ -48,5 +51,21 @@ public class User {
 
     public String getAddress() {
         return address;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setLogin(String login) {
+        this.login = login;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 }

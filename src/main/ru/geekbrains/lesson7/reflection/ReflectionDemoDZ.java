@@ -6,6 +6,7 @@ import ru.geekbrains.lesson7.orm.User;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.List;
 
 public class ReflectionDemoDZ {
 
@@ -45,6 +46,27 @@ public class ReflectionDemoDZ {
         User user = new User(0, "Вася", "1001");
         try {
             userRepository.insert(user);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        user = new User(0, "Петя", "1002");
+        try {
+            userRepository.insert(user);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        user = new User(0, "Коля", "1003");
+        try {
+            userRepository.insert(user);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            List<User> userList = userRepository.getAll();
+            int i = 0;
         } catch (SQLException e) {
             e.printStackTrace();
         }
