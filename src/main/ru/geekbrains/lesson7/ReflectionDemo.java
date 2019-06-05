@@ -1,12 +1,9 @@
 package ru.geekbrains.lesson7;
 
-import ru.geekbrains.lesson7.orm.Repository;
+import ru.geekbrains.lesson7.orm.RepositoryP;
 import ru.geekbrains.lesson7.orm.User;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
+import java.lang.reflect.*;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -81,11 +78,28 @@ public class ReflectionDemo {
         try {
             Connection conn = DriverManager.getConnection(connectionString,
                     "root", "DiasTopaz3922");
-            Repository<User> userRepository = new Repository<>(conn, User.class);
-            System.out.println(userRepository.buildCreateTableStatement());
+            RepositoryP<User> userRepository = new RepositoryP<>(conn, User.class);
+            System.out.println(userRepository.getCreateTableStatement());
+            System.out.println(userRepository.getInsertFields());
+            System.out.println(userRepository.getSelectFields());
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
+// Создание экземпляра класса, если у него нет конструктора по умолчанию
+//        clazz.getConstructors();
+        Constructor<InnerClass> constructor = InnerClass.class.getConstructor(int.class);
+        try {
+            InnerClass innerClass = constructor.newInstance(1);
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static class InnerClass {
+
+        public InnerClass(int val) {
+            System.out.println("Constructor parameter = " + val);
+        }
     }
 }
